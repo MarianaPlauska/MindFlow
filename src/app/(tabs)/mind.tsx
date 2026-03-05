@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { ScrollView, View, Text } from 'react-native';
 import { AnimatedCard } from '../../components/ui/AnimatedCard';
 import { InspirationCard } from '../../components/features/mind/InspirationCard';
-import { MoodSelector } from '../../components/features/mind/MoodSelector';
+import { DiaryForm } from '../../components/features/mind/DiaryForm';
 import { EmotionalDiary } from '../../components/features/mind/EmotionalDiary';
-import { MoodNoteModal } from '../../components/features/mind/MoodNoteModal';
 import { useMood } from '../../hooks/useMood';
 import { getRandomPhrase, MIND_PHRASES } from '../../constants/phrases';
 
@@ -28,12 +27,18 @@ export default function MindScreen() {
                     </View>
                 </AnimatedCard>
 
+                {/* Full diary form (mood + text) instead of modal */}
                 <AnimatedCard delay={200}>
                     <View className="mx-6 mb-4">
-                        <MoodSelector
+                        <DiaryForm
                             selectedScore={mood.selectedScore}
+                            notes={mood.notes}
+                            setNotes={mood.setNotes}
+                            saving={mood.saving}
                             scaleAnims={mood.scaleAnims}
                             onSelect={mood.selectMood}
+                            onSave={mood.save}
+                            onCancel={mood.resetSelection}
                         />
                     </View>
                 </AnimatedCard>
@@ -44,15 +49,6 @@ export default function MindScreen() {
                     </View>
                 </AnimatedCard>
             </ScrollView>
-
-            <MoodNoteModal
-                visible={mood.showNoteModal}
-                notes={mood.notes}
-                setNotes={mood.setNotes}
-                saving={mood.saving}
-                onSave={mood.save}
-                onClose={mood.resetSelection}
-            />
         </View>
     );
 }
