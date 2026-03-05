@@ -3,10 +3,12 @@ import { ScrollView, View, Text } from 'react-native';
 import { AnimatedCard } from '../../components/ui/AnimatedCard';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { DailyBudgetCard } from '../../components/features/wallet/DailyBudgetCard';
+import { IncomePieChart } from '../../components/features/wallet/IncomePieChart';
 import { CardCarousel } from '../../components/features/wallet/CardCarousel';
 import { AddCardModal } from '../../components/features/wallet/AddCardModal';
 import { CardExtrato } from '../../components/features/wallet/CardExtrato';
 import { SavingsPanel } from '../../components/features/wallet/SavingsPanel';
+import { QuickExpenseInput } from '../../components/features/wallet/QuickExpenseInput';
 import { useFinance } from '../../hooks/useFinance';
 import { getRandomPhrase, FINANCE_PHRASES } from '../../constants/phrases';
 
@@ -19,6 +21,10 @@ export default function WalletScreen() {
     const [selectedCard, setSelectedCard] = useState<any>(null);
     const [phrase] = useState(() => getRandomPhrase(FINANCE_PHRASES));
 
+    const installTotal = fin.installments.reduce(
+        (a: number, i: any) => a + Number(i.monthly_value), 0
+    );
+
     return (
         <View className="flex-1 bg-calm-50">
             <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
@@ -30,7 +36,7 @@ export default function WalletScreen() {
                     </View>
                 </AnimatedCard>
 
-                {/* Segmented Control */}
+                {/* Segmented */}
                 <AnimatedCard delay={80}>
                     <SegmentedControl tabs={TABS} activeIndex={tabIdx} onSelect={setTabIdx} />
                 </AnimatedCard>
@@ -47,50 +53,69 @@ export default function WalletScreen() {
                                 hasIncome={fin.income > 0}
                             />
                         </AnimatedCard>
+
                         <AnimatedCard delay={200}>
-                            <CardCarousel cards={fin.cards} onAddCard={() => { setTabIdx(1); }} />
+                            <View className="mx-6 mb-4">
+                                <IncomePieChart
+                                    income={fin.income}
+                                    fixedExpenses={Number(fin.profile?.fixed_expenses) || 0}
+                                    installmentsTotal={installTotal}
+                                    monthSpent={fin.monthSpent}
+                                />
+                            </View>
+                        </AnimatedCard>
+
+                        <AnimatedCard delay={300}>
+                            <View className="mx-6 mb-4">
+                                <QuickExpenseInput
+                                    transactions={fin.transactions}
+                                    onAdd={fin.addTransaction}
+                                />
+                            </View>
                         </AnimatedCard>
                     </>
                 )}
 
                 {/* ── Tab 1: Cartões ── */}
                 {tabIdx === 1 && (
-                    <AnimatedCard delay={120}>
-                        <View className="px-0">
-                            <CardCarousel
-                                cards={fin.cards}
-                                onAddCard={() => setShowAddCard(true)}
-                            />
-                            {fin.cards.length > 0 && (
-                                <View className="px-6 mt-2">
-                                    <Text className="text-xs text-neutral-400 mb-2">
-                                        Toque em um cartão para ver o extrato detalhado
-                                    </Text>
-                                    {fin.cards.map((card: any) => (
-                                        <View
-                                            key={card.id}
-                                            className="bg-white rounded-2xl p-4 mb-2 flex-row items-center"
-                                            style={{ shadowColor: '#1e3a5f', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}
-                                        >
-                                            <View className="w-4 h-4 rounded-full mr-3" style={{ backgroundColor: card.color }} />
-                                            <View className="flex-1">
-                                                <Text className="text-sm font-medium text-neutral-700">{card.name}</Text>
-                                                <Text className="text-xs text-neutral-400">
-                                                    R$ {Number(card.current_balance).toFixed(2).replace('.', ',')} / R$ {Number(card.card_limit).toFixed(2).replace('.', ',')}
+                    <>
+                        <AnimatedCard delay={120}>
+                            <CardCarousel cards={fin.cards} onAddCard={() => setShowAddCard(true)} />
+                        </AnimatedCard>
+
+                        <AnimatedCard delay={220}>
+                            <View className="px-6">
+                                {fin.cards.length > 0 ? (
+                                    <>
+                                        <Text className="text-xs text-neutral-400 mb-2">
+                                            Toque em "Ver extrato" para detalhes e anotações
+                                        </Text>
+                                        {fin.cards.map((card: any) => (
+                                            <View
+                                                key={card.id}
+                                                className="bg-white rounded-2xl p-4 mb-2 flex-row items-center"
+                                                style={{ shadowColor: '#1e3a5f', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}
+                                            >
+                                                <View className="w-4 h-4 rounded-full mr-3" style={{ backgroundColor: card.color }} />
+                                                <View className="flex-1">
+                                                    <Text className="text-sm font-medium text-neutral-700">{card.name}</Text>
+                                                    <Text className="text-xs text-neutral-400">
+                                                        R$ {Number(card.current_balance).toFixed(2).replace('.', ',')} / R$ {Number(card.card_limit).toFixed(2).replace('.', ',')}
+                                                    </Text>
+                                                </View>
+                                                <Text
+                                                    className="text-serene-600 text-xs font-semibold"
+                                                    onPress={() => setSelectedCard(card)}
+                                                >
+                                                    Ver extrato →
                                                 </Text>
                                             </View>
-                                            <Text
-                                                className="text-serene-600 text-xs font-semibold"
-                                                onPress={() => setSelectedCard(card)}
-                                            >
-                                                Ver extrato →
-                                            </Text>
-                                        </View>
-                                    ))}
-                                </View>
-                            )}
-                        </View>
-                    </AnimatedCard>
+                                        ))}
+                                    </>
+                                ) : null}
+                            </View>
+                        </AnimatedCard>
+                    </>
                 )}
 
                 {/* ── Tab 2: Parcelas / Poupança ── */}

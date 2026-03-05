@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { Droplets, Beef, Wallet, Sparkles, LogOut, ChevronRight } from 'lucide-react-native';
+import { Droplets, Beef, Wallet, LogOut, ChevronRight } from 'lucide-react-native';
 import { AnimatedCard } from '../../components/ui/AnimatedCard';
 import { CircularProgress } from '../../components/ui/CircularProgress';
 import { ProgressBar } from '../../components/ui/ProgressBar';
-import { GlassCard } from '../../components/ui/GlassCard';
+import { WeeklySummary } from '../../components/features/dashboard/WeeklySummary';
+import { ReminderManager } from '../../components/features/dashboard/ReminderManager';
 import { useAuth } from '../../contexts/AuthContext';
 import { useProfile } from '../../hooks/useProfile';
 import { supabase } from '../../lib/supabase';
@@ -57,11 +58,10 @@ export default function HomeScreen() {
                 </View>
             </AnimatedCard>
 
-            {/* Insight */}
+            {/* Weekly Summary */}
             <AnimatedCard delay={100}>
-                <View className="mx-6 mb-4 rounded-3xl p-5 flex-row items-center" style={{ backgroundColor: 'rgba(59,130,246,0.08)' }}>
-                    <Sparkles size={20} color="#3b82f6" />
-                    <Text className="text-sm text-serene-600 ml-3 flex-1">Cuide de si com gentileza hoje. 💙</Text>
+                <View className="mx-6 mb-4">
+                    <WeeklySummary />
                 </View>
             </AnimatedCard>
 
@@ -93,7 +93,7 @@ export default function HomeScreen() {
             </AnimatedCard>
 
             {/* Mind */}
-            <AnimatedCard delay={350}>
+            <AnimatedCard delay={300}>
                 <View className="mx-6 mb-4 bg-white rounded-3xl p-6" style={SHADOWS.card}>
                     <View className="flex-row items-center justify-between mb-4">
                         <Text className="text-base font-semibold text-neutral-800">🧠 Mente</Text>
@@ -126,7 +126,7 @@ export default function HomeScreen() {
             </AnimatedCard>
 
             {/* Finance */}
-            <AnimatedCard delay={500}>
+            <AnimatedCard delay={400}>
                 <View className="mx-6 mb-4 bg-white rounded-3xl p-6" style={SHADOWS.card}>
                     <View className="flex-row items-center justify-between mb-4">
                         <Text className="text-base font-semibold text-neutral-800">💰 Finanças</Text>
@@ -153,6 +153,13 @@ export default function HomeScreen() {
                             <Text className="text-sm text-neutral-400">Nenhum gasto registrado hoje</Text>
                         </View>
                     )}
+                </View>
+            </AnimatedCard>
+
+            {/* Reminder Manager */}
+            <AnimatedCard delay={500}>
+                <View className="mx-6 mb-4">
+                    <ReminderManager displayName={displayName} />
                 </View>
             </AnimatedCard>
         </ScrollView>
