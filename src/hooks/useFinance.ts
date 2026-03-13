@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import * as finSvc from '../services/financeService';
+import * as savSvc from '../services/savingsService';
 import { fetchProfile } from '../services/profileService';
 
 export function useFinance() {
@@ -8,6 +9,7 @@ export function useFinance() {
     const [cards, setCards] = useState<any[]>([]);
     const [installments, setInstallments] = useState<any[]>([]);
     const [transactions, setTransactions] = useState<any[]>([]);
+    const [savings, setSavings] = useState<any[]>([]);
     const [profile, setProfile] = useState<any>(null);
     const [todaySpent, setTodaySpent] = useState(0);
     const [monthSpent, setMonthSpent] = useState(0);
@@ -21,17 +23,19 @@ export function useFinance() {
         const userId = session!.user.id;
         setLoading(true);
 
-        const [profileRes, cardsRes, installRes, txRes] = await Promise.all([
+        const [profileRes, cardsRes, installRes, txRes, savRes] = await Promise.all([
             fetchProfile(userId),
             finSvc.fetchCards(userId),
             finSvc.fetchInstallments(userId),
             finSvc.fetchTransactions(userId),
+            savSvc.fetchSavings(userId),
         ]);
 
         if (profileRes.data) setProfile(profileRes.data);
         setCards(cardsRes.data);
         setInstallments(installRes.data);
         setTransactions(txRes.data);
+        setSavings(savRes.data);
 
         const today = new Date().toISOString().split('T')[0];
         const thisMonth = today.substring(0, 7);
@@ -61,6 +65,9 @@ export function useFinance() {
     const available = income - fixedExpenses - installTotal - monthSpent;
     const dailyBudget = daysRemaining > 0 ? Math.max(available / daysRemaining, 0) : 0;
 
+    // Savings balance
+    const savingsBalance = savSvc.calculateSavingsBalance(savings);
+
     async function handleAddCard(card: {
         name: string; type: string; card_limit: number; color: string;
     }) {
@@ -71,6 +78,7 @@ export function useFinance() {
 
     async function handleAddInstallment(inst: {
         description: string; total_value: number; remaining_installments: number; monthly_value: number;
+        notes?: string; category?: string;
     }) {
         const { error } = await finSvc.addInstallment(session!.user.id, inst);
         if (!error) await load();
@@ -85,10 +93,20 @@ export function useFinance() {
         return { error };
     }
 
+    async function handleAddSavings(entry: {
+        description: string; amount: number; type: 'deposit' | 'withdrawal'; notes?: string | null;
+    }) {
+        const { error } = await savSvc.addSavingsDeposit(session!.user.id, entry);
+        if (!error) await load();
+        return { error };
+    }
+
     return {
         cards,
         installments,
         transactions,
+        savings,
+        savingsBalance,
         profile,
         todaySpent,
         monthSpent,
@@ -96,10 +114,12 @@ export function useFinance() {
         daysRemaining,
         available,
         income,
+        fixedExpenses,
         loading,
         addCard: handleAddCard,
         addInstallment: handleAddInstallment,
         addTransaction: handleAddTransaction,
+        addSavings: handleAddSavings,
         refresh: load,
     };
 }

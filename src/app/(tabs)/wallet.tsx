@@ -125,7 +125,10 @@ export default function WalletScreen() {
                             <SavingsPanel
                                 installments={fin.installments}
                                 income={fin.income}
+                                savings={fin.savings}
+                                savingsBalance={fin.savingsBalance}
                                 onAddInstallment={fin.addInstallment}
+                                onAddSavings={fin.addSavings}
                             />
                         </View>
                     </AnimatedCard>
