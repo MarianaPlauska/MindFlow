@@ -5,18 +5,18 @@ export default function TabsLayout() {
     return (
         <Tabs
             screenOptions={{
-                headerStyle: { backgroundColor: '#f0fdf4' },  // calm-50
-                headerTintColor: '#1d4ed8',                     // serene-700
+                headerStyle: { backgroundColor: '#0f0f0f' },
+                headerTintColor: '#e5e5e5',
                 headerTitleStyle: { fontWeight: '600' },
                 tabBarStyle: {
-                    backgroundColor: '#fafafa',         // neutral-50
-                    borderTopColor: '#e5e5e5',          // neutral-200
+                    backgroundColor: '#0f0f0f',
+                    borderTopColor: '#262626',
                     paddingTop: 4,
                     height: 60,
                 },
-                tabBarActiveTintColor: '#3b82f6',     // serene-500
-                tabBarInactiveTintColor: '#a3a3a3',   // neutral-400
-                tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
+                tabBarActiveTintColor: '#4ade80',   // calm-400
+                tabBarInactiveTintColor: '#525252',  // neutral-600
+                tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
             }}
         >
             <Tabs.Screen
@@ -24,7 +24,34 @@ export default function TabsLayout() {
                 options={{
                     title: 'Início',
                     tabBarIcon: ({ color }) => (
-                        <Text style={{ fontSize: 22, color }}>🏠</Text>
+                        <Text style={{ fontSize: 20, color }}>🏠</Text>
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="habits"
+                options={{
+                    title: 'Hábitos',
+                    tabBarIcon: ({ color }) => (
+                        <Text style={{ fontSize: 20, color }}>📋</Text>
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="workout"
+                options={{
+                    title: 'Treinos',
+                    tabBarIcon: ({ color }) => (
+                        <Text style={{ fontSize: 20, color }}>🏋️</Text>
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="wallet"
+                options={{
+                    title: 'Finanças',
+                    tabBarIcon: ({ color }) => (
+                        <Text style={{ fontSize: 20, color }}>💰</Text>
                     ),
                 }}
             />
