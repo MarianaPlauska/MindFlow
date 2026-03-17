@@ -1,147 +1,153 @@
-import { useCallback, useEffect, useState } from 'react';
-import {
-    View,
-    Text,
-    ScrollView,
-    ActivityIndicator,
-    RefreshControl,
-} from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
-import { supabase } from '../../lib/supabase';
-import GoalProgressBar from '../../components/GoalProgressBar';
+import React, { useState } from 'react';
+import { ScrollView, View, Text } from 'react-native';
+import { AnimatedCard } from '../../components/ui/AnimatedCard';
+import { SegmentedControl } from '../../components/ui/SegmentedControl';
+import { DailyBudgetCard } from '../../components/features/wallet/DailyBudgetCard';
+import { IncomePieChart } from '../../components/features/wallet/IncomePieChart';
+import { CardCarousel } from '../../components/features/wallet/CardCarousel';
+import { AddCardModal } from '../../components/features/wallet/AddCardModal';
+import { CardExtrato } from '../../components/features/wallet/CardExtrato';
+import { SavingsPanel } from '../../components/features/wallet/SavingsPanel';
+import { QuickExpenseInput } from '../../components/features/wallet/QuickExpenseInput';
+import { useFinance } from '../../hooks/useFinance';
+import { getRandomPhrase, FINANCE_PHRASES } from '../../constants/phrases';
 
-type FinancialGoal = {
-    id: string;
-    user_id: string;
-    title: string;
-    target_amount: number;
-    current_amount: number;
-    created_at: string;
-};
-
-// One accent per goal (cycles through list)
-const ACCENTS = ['#4ade80', '#60a5fa', '#f472b6', '#fde047', '#a78bfa'];
+const TABS = ['Visão Geral', 'Cartões', 'Parcelas'];
 
 export default function WalletScreen() {
-    const { session } = useAuth();
-    const [goals, setGoals] = useState<FinancialGoal[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
+    const fin = useFinance();
+    const [tabIdx, setTabIdx] = useState(0);
+    const [showAddCard, setShowAddCard] = useState(false);
+    const [selectedCard, setSelectedCard] = useState<any>(null);
+    const [phrase] = useState(() => getRandomPhrase(FINANCE_PHRASES));
 
-    async function fetchGoals() {
-        if (!session?.user.id) return;
-        const { data } = await supabase
-            .from('financial_goals')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .order('created_at', { ascending: true });
-        setGoals((data ?? []) as FinancialGoal[]);
-    }
-
-    useEffect(() => {
-        fetchGoals().finally(() => setLoading(false));
-    }, [session]);
-
-    const onRefresh = useCallback(async () => {
-        setRefreshing(true);
-        await fetchGoals();
-        setRefreshing(false);
-    }, [session]);
-
-    const totalTarget = goals.reduce((sum, g) => sum + Number(g.target_amount), 0);
-    const totalCurrent = goals.reduce((sum, g) => sum + Number(g.current_amount), 0);
+    const installTotal = fin.installments.reduce(
+        (a: number, i: any) => a + Number(i.monthly_value), 0
+    );
 
     return (
-        <View className="flex-1 bg-neutral-950">
-            <ScrollView
-                contentContainerStyle={{
-                    paddingHorizontal: 16,
-                    paddingTop: 24,
-                    paddingBottom: 40,
-                }}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        tintColor="#4ade80"
-                    />
-                }
-            >
-                {/* Page header */}
-                <View className="mb-6">
-                    <Text className="text-2xl font-bold text-neutral-100">
-                        Finanças
-                    </Text>
-                    <Text className="text-sm text-neutral-500 mt-1">
-                        Acompanhe suas metas financeiras
-                    </Text>
-                </View>
-
-                {/* Summary card */}
-                {goals.length > 0 && (
-                    <View
-                        className="bg-neutral-900 rounded-3xl p-5 mb-8"
-                        style={{
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 4 },
-                            shadowOpacity: 0.4,
-                            shadowRadius: 10,
-                            elevation: 6,
-                        }}
-                    >
-                        <Text className="text-xs font-bold tracking-widest text-neutral-500 mb-3">
-                            TOTAL ACUMULADO
-                        </Text>
-                        <Text className="text-3xl font-bold text-white mb-1">
-                            R${' '}
-                            {totalCurrent.toLocaleString('pt-BR', {
-                                minimumFractionDigits: 2,
-                            })}
-                        </Text>
-                        <Text className="text-sm text-neutral-500">
-                            de R${' '}
-                            {totalTarget.toLocaleString('pt-BR', {
-                                minimumFractionDigits: 2,
-                            })}{' '}
-                            em metas
-                        </Text>
+        <View className="flex-1 bg-calm-50">
+            <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+                {/* Header */}
+                <AnimatedCard delay={0}>
+                    <View className="pt-16 pb-2 px-6">
+                        <Text className="text-2xl font-bold text-neutral-800">💰 Finanças</Text>
+                        <Text className="text-sm text-neutral-400 mt-1">{phrase}</Text>
                     </View>
+                </AnimatedCard>
+
+                {/* Segmented */}
+                <AnimatedCard delay={80}>
+                    <SegmentedControl tabs={TABS} activeIndex={tabIdx} onSelect={setTabIdx} />
+                </AnimatedCard>
+
+                {/* ── Tab 0: Visão Geral ── */}
+                {tabIdx === 0 && (
+                    <>
+                        <AnimatedCard delay={120}>
+                            <DailyBudgetCard
+                                dailyBudget={fin.dailyBudget}
+                                daysRemaining={fin.daysRemaining}
+                                available={fin.available}
+                                monthSpent={fin.monthSpent}
+                                hasIncome={fin.income > 0}
+                            />
+                        </AnimatedCard>
+
+                        <AnimatedCard delay={200}>
+                            <View className="mx-6 mb-4">
+                                <IncomePieChart
+                                    income={fin.income}
+                                    fixedExpenses={Number(fin.profile?.fixed_expenses) || 0}
+                                    installmentsTotal={installTotal}
+                                    monthSpent={fin.monthSpent}
+                                />
+                            </View>
+                        </AnimatedCard>
+
+                        <AnimatedCard delay={300}>
+                            <View className="mx-6 mb-4">
+                                <QuickExpenseInput
+                                    transactions={fin.transactions}
+                                    onAdd={fin.addTransaction}
+                                />
+                            </View>
+                        </AnimatedCard>
+                    </>
                 )}
 
-                {/* Section header */}
-                <Text className="text-xs font-bold tracking-widest text-neutral-500 mb-4 px-1">
-                    METAS FINANCEIRAS
-                </Text>
+                {/* ── Tab 1: Cartões ── */}
+                {tabIdx === 1 && (
+                    <>
+                        <AnimatedCard delay={120}>
+                            <CardCarousel cards={fin.cards} onAddCard={() => setShowAddCard(true)} />
+                        </AnimatedCard>
 
-                {loading && (
-                    <ActivityIndicator
-                        size="large"
-                        color="#4ade80"
-                        style={{ marginTop: 40 }}
-                    />
+                        <AnimatedCard delay={220}>
+                            <View className="px-6">
+                                {fin.cards.length > 0 ? (
+                                    <>
+                                        <Text className="text-xs text-neutral-400 mb-2">
+                                            Toque em "Ver extrato" para detalhes e anotações
+                                        </Text>
+                                        {fin.cards.map((card: any) => (
+                                            <View
+                                                key={card.id}
+                                                className="bg-white rounded-2xl p-4 mb-2 flex-row items-center"
+                                                style={{ shadowColor: '#1e3a5f', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}
+                                            >
+                                                <View className="w-4 h-4 rounded-full mr-3" style={{ backgroundColor: card.color }} />
+                                                <View className="flex-1">
+                                                    <Text className="text-sm font-medium text-neutral-700">{card.name}</Text>
+                                                    <Text className="text-xs text-neutral-400">
+                                                        R$ {Number(card.current_balance).toFixed(2).replace('.', ',')} / R$ {Number(card.card_limit).toFixed(2).replace('.', ',')}
+                                                    </Text>
+                                                </View>
+                                                <Text
+                                                    className="text-serene-600 text-xs font-semibold"
+                                                    onPress={() => setSelectedCard(card)}
+                                                >
+                                                    Ver extrato →
+                                                </Text>
+                                            </View>
+                                        ))}
+                                    </>
+                                ) : null}
+                            </View>
+                        </AnimatedCard>
+                    </>
                 )}
 
-                {!loading && goals.length === 0 && (
-                    <View className="items-center mt-16">
-                        <Text className="text-4xl mb-4">🎯</Text>
-                        <Text className="text-base text-neutral-400 text-center">
-                            Nenhuma meta cadastrada ainda.{'\n'}Adicione pelo Supabase ou aguarde a UI de criação.
-                        </Text>
-                    </View>
+                {/* ── Tab 2: Parcelas / Poupança ── */}
+                {tabIdx === 2 && (
+                    <AnimatedCard delay={120}>
+                        <View className="px-6">
+                            <SavingsPanel
+                                installments={fin.installments}
+                                income={fin.income}
+                                savings={fin.savings}
+                                savingsBalance={fin.savingsBalance}
+                                onAddInstallment={fin.addInstallment}
+                                onAddSavings={fin.addSavings}
+                            />
+                        </View>
+                    </AnimatedCard>
                 )}
-
-                {!loading &&
-                    goals.map((goal, i) => (
-                        <GoalProgressBar
-                            key={goal.id}
-                            title={goal.title}
-                            current={Number(goal.current_amount)}
-                            target={Number(goal.target_amount)}
-                            accentColor={ACCENTS[i % ACCENTS.length]}
-                        />
-                    ))}
             </ScrollView>
+
+            {/* Modals */}
+            <AddCardModal
+                visible={showAddCard}
+                onClose={() => setShowAddCard(false)}
+                onAdd={fin.addCard}
+            />
+            <CardExtrato
+                visible={!!selectedCard}
+                card={selectedCard}
+                transactions={fin.transactions}
+                onAddTransaction={(tx: any) => fin.addTransaction({ ...tx, payment_method_id: selectedCard?.id })}
+                onClose={() => setSelectedCard(null)}
+            />
         </View>
     );
 }
