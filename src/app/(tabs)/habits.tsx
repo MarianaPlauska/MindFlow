@@ -49,10 +49,10 @@ function Section({ label, accentClass, habits, onToggle, proteinGoalG }: Section
             <Text className={`text-xs font-bold tracking-widest mb-2 px-4 ${accentClass}`}>
                 {label}
             </Text>
-            <View className="bg-neutral-900 rounded-2xl overflow-hidden divide-y divide-neutral-800">
+            <View className="bg-white rounded-3xl overflow-hidden divide-y divide-neutral-100" style={{ boxShadow: '0px 4px 16px rgba(0,0,0,0.03)' }}>
                 {habits.map((h, i) => (
                     <View key={h.id}>
-                        {i > 0 && <View className="h-px bg-neutral-800 mx-4" />}
+                        {i > 0 && <View className="h-px bg-neutral-100 mx-4" />}
                         <HabitItem
                             habit={h}
                             onToggle={onToggle}
@@ -132,7 +132,7 @@ export default function HabitsScreen() {
     const hasAnything = overdue.length + today.length + completedToday.length > 0;
 
     return (
-        <View className="flex-1 bg-neutral-950">
+        <View className="flex-1 bg-slate-50">
             <ScrollView
                 contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 40 }}
                 showsVerticalScrollIndicator={false}
@@ -145,9 +145,9 @@ export default function HabitsScreen() {
                 }
             >
                 {/* Page header */}
-                <View className="mb-6">
-                    <Text className="text-2xl font-bold text-neutral-100">Tarefas</Text>
-                    <Text className="text-sm text-neutral-500 mt-1">
+                <View className="mb-6 px-2">
+                    <Text className="text-3xl font-extrabold text-neutral-800 tracking-tight">Hábitos</Text>
+                    <Text className="text-sm text-neutral-500 mt-1 font-medium">
                         {new Date().toLocaleDateString('pt-BR', {
                             weekday: 'long',
                             day: 'numeric',
@@ -177,20 +177,20 @@ export default function HabitsScreen() {
                     <>
                         <Section
                             label="VENCIDAS"
-                            accentClass="text-warmth-400"
+                            accentClass="text-warmth-500"
                             habits={overdue}
                             onToggle={handleToggle}
                             proteinGoalG={proteinGoalG}
                         />
                         <Section
-                            label="HOJE"
-                            accentClass="text-neutral-400"
+                            label="PARA HOJE"
+                            accentClass="text-serene-600"
                             habits={today}
                             onToggle={handleToggle}
                             proteinGoalG={proteinGoalG}
                         />
                         <Section
-                            label="CONCLUÍDAS (HOJE)"
+                            label="CONCLUÍDAS"
                             accentClass="text-calm-600"
                             habits={completedToday}
                             onToggle={handleToggle}

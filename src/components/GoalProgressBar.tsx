@@ -27,11 +27,7 @@ export default function GoalProgressBar({
         <View
             className="bg-neutral-800 rounded-2xl p-5 mb-4"
             style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.35,
-                shadowRadius: 8,
-                elevation: 5,
+                boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.35)',
             }}
         >
             {/* Title row */}

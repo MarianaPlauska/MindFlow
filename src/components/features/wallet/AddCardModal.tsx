@@ -67,7 +67,7 @@ export function AddCardModal({ visible, onClose, onAdd }: Props) {
                         style={{
                             width: 36, height: 36, borderRadius: 18, backgroundColor: c,
                             borderWidth: color === c ? 3 : 0, borderColor: '#fff',
-                            ...(color === c ? { shadowColor: c, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.4, shadowRadius: 6, elevation: 4 } : {}),
+                            ...(color === c ? { boxShadow: `0px 2px 6px ${c}66` } : {}),
                         }}
                     />
                 ))}

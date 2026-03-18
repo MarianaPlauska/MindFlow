@@ -24,11 +24,11 @@ export function useFinance() {
         setLoading(true);
 
         const [profileRes, cardsRes, installRes, txRes, savRes] = await Promise.all([
-            fetchProfile(userId),
-            finSvc.fetchCards(userId),
-            finSvc.fetchInstallments(userId),
-            finSvc.fetchTransactions(userId),
-            savSvc.fetchSavings(userId),
+            fetchProfile(userId).catch(() => ({ data: null })),
+            finSvc.fetchCards(userId).catch(() => ({ data: [] })),
+            finSvc.fetchInstallments(userId).catch(() => ({ data: [] })),
+            finSvc.fetchTransactions(userId).catch(() => ({ data: [] })),
+            savSvc.fetchSavings(userId).catch(() => ({ data: [] })),
         ]);
 
         if (profileRes.data) setProfile(profileRes.data);
@@ -62,11 +62,12 @@ export function useFinance() {
     ).getDate();
     const dayOfMonth = new Date().getDate();
     const daysRemaining = daysInMonth - dayOfMonth + 1;
-    const available = income - fixedExpenses - installTotal - monthSpent;
-    const dailyBudget = daysRemaining > 0 ? Math.max(available / daysRemaining, 0) : 0;
-
     // Savings balance
     const savingsBalance = savSvc.calculateSavingsBalance(savings);
+
+    const available = income - fixedExpenses - installTotal - savingsBalance;
+    const remainingForMonth = available - monthSpent;
+    const dailyBudget = daysRemaining > 0 ? Math.max(remainingForMonth / daysRemaining, 0) : 0;
 
     async function handleAddCard(card: {
         name: string; type: string; card_limit: number; color: string;
@@ -113,6 +114,7 @@ export function useFinance() {
         dailyBudget,
         daysRemaining,
         available,
+        remainingForMonth,
         income,
         fixedExpenses,
         loading,

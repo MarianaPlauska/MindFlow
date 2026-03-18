@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useProfile } from './useProfile';
 import { supabase } from '../lib/supabase';
 import { WATER_GOAL_ML, PROTEIN_GOAL_G } from '../constants/goals';
 import { MOOD_LEVELS } from '../constants/categories';
@@ -8,22 +9,21 @@ export interface WeeklyInsight {
     waterDaysHit: number;
     waterAvgMl: number;
     proteinDaysHit: number;
+    workoutDaysHit?: number;
     moodAvgScore: number;
     moodStablePct: number;
     dominantMood: string;
     totalSpent: number;
     topCategory: string;
     message: string;
+    workoutAdvice?: string;
 }
 
-/**
- * Analyzes the past 7 days of data from Supabase to generate
- * a warm, encouraging weekly summary.
- */
 export function useWeeklyInsights() {
     const { session } = useAuth();
     const [insight, setInsight] = useState<WeeklyInsight | null>(null);
     const [loading, setLoading] = useState(true);
+    const { profile } = useProfile();
 
     useEffect(() => {
         if (session?.user?.id) analyze();
@@ -38,7 +38,7 @@ export function useWeeklyInsights() {
         weekAgo.setDate(weekAgo.getDate() - 7);
         const weekAgoISO = weekAgo.toISOString();
 
-        // Fetch last 7 days of data in parallel
+       
         const [waterRes, moodRes, txRes] = await Promise.all([
             supabase
                 .from('water_logs')
@@ -61,7 +61,7 @@ export function useWeeklyInsights() {
         const moodLogs = moodRes.data || [];
         const txLogs = txRes.data || [];
 
-        // ── Water analysis ──────────────────────────────────
+        //água
         const waterByDay = groupByDay(waterLogs, 'logged_at');
         let waterDaysHit = 0;
         let totalWater = 0;
@@ -73,7 +73,7 @@ export function useWeeklyInsights() {
         const daysWithData = Math.max(Object.keys(waterByDay).length, 1);
         const waterAvgMl = Math.round(totalWater / daysWithData);
 
-        // ── Mood analysis ───────────────────────────────────
+        //humor
         const scores = moodLogs.map((m: any) => m.mood_score);
         const moodAvgScore = scores.length > 0
             ? scores.reduce((a: number, s: number) => a + s, 0) / scores.length
@@ -83,7 +83,7 @@ export function useWeeklyInsights() {
             ? Math.round((stableLogs.length / scores.length) * 100)
             : 0;
 
-        // Find dominant mood type
+       
         const typeCounts: Record<string, number> = {};
         moodLogs.forEach((m: any) => {
             const t = m.mood_type || 'Neutro';
@@ -93,7 +93,7 @@ export function useWeeklyInsights() {
             ? Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0][0]
             : 'Sem registros';
 
-        // ── Finance analysis ────────────────────────────────
+        //análise financeira
         const totalSpent = txLogs.reduce((a: number, t: any) => a + Number(t.amount), 0);
         const catCounts: Record<string, number> = {};
         txLogs.forEach((t: any) => {
@@ -104,7 +104,7 @@ export function useWeeklyInsights() {
             ? Object.entries(catCounts).sort((a, b) => b[1] - a[1])[0][0]
             : 'Nenhum';
 
-        // ── Generate warm message ───────────────────────────
+        //alguns avisos de exercícios e uns emojis
         const parts: string[] = [];
 
         if (waterDaysHit > 0) {
@@ -128,6 +128,7 @@ export function useWeeklyInsights() {
             message = `Esta semana, ${parts.join(', ')}. Continue cuidando de si! 💙`;
         }
 
+
         setInsight({
             waterDaysHit,
             waterAvgMl,
@@ -145,7 +146,6 @@ export function useWeeklyInsights() {
     return { insight, loading, refresh: analyze };
 }
 
-// Group records by day using a date field
 function groupByDay(records: any[], dateField: string): Record<string, any[]> {
     const groups: Record<string, any[]> = {};
     records.forEach((r) => {

@@ -72,7 +72,7 @@ module.exports = {
                 },
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', 'sans-serif'],
+                sans: ['Quicksand_400Regular', 'Quicksand_500Medium', 'Quicksand_600SemiBold', 'Quicksand_700Bold', 'system-ui', 'sans-serif'],
             },
         },
     },

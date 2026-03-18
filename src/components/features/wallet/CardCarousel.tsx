@@ -6,10 +6,17 @@ import { SectionHeader } from '../../ui/SectionHeader';
 
 interface Props {
     cards: any[];
+    transactions?: any[];
     onAddCard: () => void;
 }
 
-export function CardCarousel({ cards, onAddCard }: Props) {
+export function CardCarousel({ cards, transactions = [], onAddCard }: Props) {
+    // Calculate spending per card from transactions
+    function getCardSpent(cardId: string) {
+        return transactions
+            .filter((t: any) => t.payment_method_id === cardId)
+            .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
+    }
     return (
         <View className="mb-4">
             <View className="px-6">
@@ -34,7 +41,9 @@ export function CardCarousel({ cards, onAddCard }: Props) {
                         <Text className="text-neutral-400 text-sm mt-3">Adicionar cartão</Text>
                     </TouchableOpacity>
                 ) : (
-                    cards.map((card) => <PaymentCard key={card.id} card={card} />)
+                    cards.map((card) => (
+                        <PaymentCard key={card.id} card={card} spent={getCardSpent(card.id)} />
+                    ))
                 )}
             </ScrollView>
         </View>

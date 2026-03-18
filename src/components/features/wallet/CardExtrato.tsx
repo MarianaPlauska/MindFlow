@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, Platform } from 'react-native';
 import { FileText, Plus, Trash2, Tag } from 'lucide-react-native';
+import * as Haptics from 'expo-haptics';
 import { BottomModal } from '../../ui/BottomModal';
 import { SHADOWS } from '../../../constants/theme';
 import { TX_CATEGORIES } from '../../../constants/categories';
@@ -28,6 +29,7 @@ export function CardExtrato({ card, transactions, onAddTransaction, onClose, vis
             amount: parseFloat(amount) || 0,
             notes: notes.trim() || null,
             category,
+            payment_method_id: card?.id,
         });
         setDesc(''); setAmount(''); setNotes(''); setShowAdd(false);
     }
@@ -65,13 +67,16 @@ export function CardExtrato({ card, transactions, onAddTransaction, onClose, vis
                 )}
             </ScrollView>
 
-            <TouchableOpacity
-                onPress={() => setShowAdd(!showAdd)}
-                className="bg-serene-50 rounded-2xl py-3 items-center mt-4 flex-row justify-center"
+            <Pressable
+                onPress={() => {
+                    if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
+                    setShowAdd(!showAdd);
+                }}
+                className="bg-serene-50 rounded-2xl py-3 items-center mt-4 flex-row justify-center active:opacity-70"
             >
                 <Plus size={16} color="#3b82f6" />
                 <Text className="text-serene-600 font-semibold ml-1">Registrar Gasto</Text>
-            </TouchableOpacity>
+            </Pressable>
 
             {showAdd && (
                 <View className="mt-4">
@@ -94,16 +99,19 @@ export function CardExtrato({ card, transactions, onAddTransaction, onClose, vis
                     <Text className="text-xs font-medium text-neutral-500 mb-2">Categoria</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
                         {TX_CATEGORIES.map((cat) => (
-                            <TouchableOpacity
+                            <Pressable
                                 key={cat.key}
-                                onPress={() => setCategory(cat.key)}
-                                className={`mr-2 px-3 py-1.5 rounded-full border ${category === cat.key ? 'bg-serene-50 border-serene-300' : 'border-neutral-200'
+                                onPress={() => {
+                                    if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => {});
+                                    setCategory(cat.key);
+                                }}
+                                className={`mr-2 px-3 py-1.5 rounded-full border active:opacity-70 ${category === cat.key ? 'bg-serene-50 border-serene-300' : 'border-neutral-200'
                                     }`}
                             >
                                 <Text className={`text-xs ${category === cat.key ? 'text-serene-600' : 'text-neutral-400'}`}>
                                     {cat.emoji} {cat.label}
                                 </Text>
-                            </TouchableOpacity>
+                            </Pressable>
                         ))}
                     </ScrollView>
 
@@ -116,9 +124,15 @@ export function CardExtrato({ card, transactions, onAddTransaction, onClose, vis
                         multiline
                     />
 
-                    <TouchableOpacity onPress={handleAdd} className="bg-serene-500 rounded-2xl py-3.5 items-center">
+                    <Pressable 
+                        onPress={() => {
+                            if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                            handleAdd();
+                        }} 
+                        className="bg-serene-500 rounded-2xl py-3.5 items-center active:opacity-80"
+                    >
                         <Text className="text-white font-semibold">Salvar</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                 </View>
             )}
         </BottomModal>

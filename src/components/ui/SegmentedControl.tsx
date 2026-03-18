@@ -20,11 +20,7 @@ export function SegmentedControl({ tabs, activeIndex, onSelect }: Props) {
                     style={
                         activeIndex === i
                             ? {
-                                shadowColor: '#000',
-                                shadowOffset: { width: 0, height: 1 },
-                                shadowOpacity: 0.08,
-                                shadowRadius: 4,
-                                elevation: 2,
+                                boxShadow: '0px 1px 4px rgba(0, 0, 0, 0.08)',
                             }
                             : {}
                     }

@@ -3,6 +3,15 @@ import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Slot, useRouter, useSegments } from 'expo-router';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import {
+    useFonts,
+    Quicksand_400Regular,
+    Quicksand_500Medium,
+    Quicksand_600SemiBold,
+    Quicksand_700Bold,
+} from '@expo-google-fonts/quicksand';
 
 function RootLayoutNav() {
     const { session, loading, isNewUser } = useAuth();
@@ -38,9 +47,24 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+    let [fontsLoaded] = useFonts({
+        Quicksand_400Regular,
+        Quicksand_500Medium,
+        Quicksand_600SemiBold,
+        Quicksand_700Bold,
+    });
+
+    if (!fontsLoaded) {
+        return null;
+    }
+
     return (
-        <AuthProvider>
-            <RootLayoutNav />
-        </AuthProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <BottomSheetModalProvider>
+                <AuthProvider>
+                    <RootLayoutNav />
+                </AuthProvider>
+            </BottomSheetModalProvider>
+        </GestureHandlerRootView>
     );
 }

@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { View, Platform } from 'react-native';
-import { Home, Wallet, Heart, Brain } from 'lucide-react-native';
+import { Home, Wallet, Heart, Brain, Dumbbell } from 'lucide-react-native';
 
 export default function TabsLayout() {
     return (
@@ -15,8 +15,8 @@ export default function TabsLayout() {
                     fontWeight: '600',
                     marginBottom: Platform.OS === 'ios' ? 0 : 6,
                 },
-                headerStyle: { backgroundColor: '#0f0f0f' },
-                headerTintColor: '#e5e5e5',
+                headerStyle: { backgroundColor: '#f8fafc' },
+                headerTintColor: '#262626',
                 headerTitleStyle: { fontWeight: '600' },
                 tabBarStyle: {
                     position: 'absolute',
@@ -109,7 +109,21 @@ export default function TabsLayout() {
                 }}
             />
             <Tabs.Screen name="habits" options={{ href: null }} />
-            <Tabs.Screen name="workout" options={{ href: null }} />
+            <Tabs.Screen
+                name="workout"
+                options={{
+                    title: 'Treinos',
+                    tabBarIcon: ({ color, focused }) => (
+                        <View style={{ alignItems: 'center' }}>
+                            <Dumbbell
+                                size={22}
+                                color={color}
+                                strokeWidth={focused ? 2.5 : 1.8}
+                            />
+                        </View>
+                    ),
+                }}
+            />
         </Tabs>
     );
 }

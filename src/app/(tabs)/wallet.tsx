@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { AnimatedCard } from '../../components/ui/AnimatedCard';
 import { SegmentedControl } from '../../components/ui/SegmentedControl';
 import { DailyBudgetCard } from '../../components/features/wallet/DailyBudgetCard';
@@ -48,8 +48,9 @@ export default function WalletScreen() {
                             <DailyBudgetCard
                                 dailyBudget={fin.dailyBudget}
                                 daysRemaining={fin.daysRemaining}
-                                available={fin.available}
+                                available={fin.remainingForMonth}
                                 monthSpent={fin.monthSpent}
+                                income={fin.income}
                                 hasIncome={fin.income > 0}
                             />
                         </AnimatedCard>
@@ -64,6 +65,8 @@ export default function WalletScreen() {
                                 />
                             </View>
                         </AnimatedCard>
+
+
 
                         <AnimatedCard delay={300}>
                             <View className="mx-6 mb-4">
@@ -80,7 +83,7 @@ export default function WalletScreen() {
                 {tabIdx === 1 && (
                     <>
                         <AnimatedCard delay={120}>
-                            <CardCarousel cards={fin.cards} onAddCard={() => setShowAddCard(true)} />
+                            <CardCarousel cards={fin.cards} transactions={fin.transactions} onAddCard={() => setShowAddCard(true)} />
                         </AnimatedCard>
 
                         <AnimatedCard delay={220}>
@@ -94,7 +97,7 @@ export default function WalletScreen() {
                                             <View
                                                 key={card.id}
                                                 className="bg-white rounded-2xl p-4 mb-2 flex-row items-center"
-                                                style={{ shadowColor: '#1e3a5f', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 8, elevation: 2 }}
+                                                style={{ boxShadow: '0px 2px 8px rgba(30, 58, 95, 0.04)' }}
                                             >
                                                 <View className="w-4 h-4 rounded-full mr-3" style={{ backgroundColor: card.color }} />
                                                 <View className="flex-1">

@@ -46,32 +46,16 @@ export const COLORS = {
 // ─── Shadow Presets ─────────────────────────────────────
 export const SHADOWS = {
     card: {
-        shadowColor: '#1e3a5f',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 16,
-        elevation: 4,
+        boxShadow: '0px 4px 16px rgba(30, 58, 95, 0.05)',
     },
     cardSm: {
-        shadowColor: '#1e3a5f',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.04,
-        shadowRadius: 8,
-        elevation: 2,
+        boxShadow: '0px 2px 8px rgba(30, 58, 95, 0.03)',
     },
     glass: {
-        shadowColor: '#1e3a5f',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 20,
-        elevation: 12,
+        boxShadow: '0px -4px 20px rgba(30, 58, 95, 0.05)',
     },
     coloredCard: (color: string) => ({
-        shadowColor: color,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.25,
-        shadowRadius: 16,
-        elevation: 8,
+        boxShadow: `0px 8px 16px ${color}26`,
     }),
 } as const;
 
